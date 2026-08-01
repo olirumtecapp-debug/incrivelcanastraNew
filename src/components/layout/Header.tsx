@@ -5,6 +5,8 @@ const links = [
   { to: "/", label: "Lobby" },
   { to: "/como-jogar", label: "Como jogar" },
   { to: "/jogar", label: "Mesa" },
+  { to: "/online", label: "Online" },
+
 
   { to: "/campanha", label: "Campanha" },
   { to: "/perfil", label: "Perfil" },

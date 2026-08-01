@@ -73,11 +73,18 @@ function Lobby() {
               Jogar agora
             </Link>
             <Link
+              to="/online"
+              className="rounded-full border border-[var(--gold)]/60 px-6 py-3 font-medium transition-colors hover:bg-[var(--gold)]/10"
+            >
+              Jogar online com código
+            </Link>
+            <Link
               to="/campanha"
               className="rounded-full border px-6 py-3 font-medium transition-colors hover:bg-[var(--gold)]/10"
             >
               Ver campanha
             </Link>
+
           </div>
         </section>
 
