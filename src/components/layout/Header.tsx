@@ -16,11 +16,11 @@ export function Header() {
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-3 py-2 sm:px-4 sm:py-3">
         <Link to="/" className="flex min-w-0 items-center gap-2">
           <Crown className="h-5 w-5 shrink-0 sm:h-6 sm:w-6 text-[var(--gold)]" />
-          <span className="gold-text font-display truncate text-base font-bold tracking-wide sm:text-xl">
+          <span className="gold-text font-display hidden truncate text-base sm:inline font-bold tracking-wide sm:text-xl">
             Canastra Royale
           </span>
         </Link>
-        <nav className="flex shrink-0 items-center gap-0.5 overflow-x-auto text-xs sm:gap-1 sm:text-sm">
+        <nav className="flex min-w-0 items-center gap-0.5 overflow-x-auto text-xs sm:gap-1 sm:text-sm">
           {links.map((l) => (
             <Link
               key={l.to}
