@@ -54,7 +54,8 @@ export const PERSONAS: AiPersona[] = [
   },
 ];
 
-export const personaById = (id: Difficulty) => PERSONAS.find((p) => p.id === id) ?? PERSONAS[2];
+export const personaById = (id: Difficulty): AiPersona =>
+  PERSONAS.find((p) => p.id === id) ?? PERSONAS[2]!;
 
 function combos(cards: Card[], size: number): Card[][] {
   const out: Card[][] = [];

@@ -3,13 +3,13 @@ import { RANK_LABEL, SUIT_SYMBOL, isJoker } from "@/lib/canastra/rules";
 import type { Card, Suit } from "@/lib/canastra/types";
 
 interface Props {
-  card?: Card;
-  faceDown?: boolean;
-  selected?: boolean;
-  small?: boolean;
-  onClick?: () => void;
-  className?: string;
-  index?: number;
+  card?: Card | undefined;
+  faceDown?: boolean | undefined;
+  selected?: boolean | undefined;
+  small?: boolean | undefined;
+  onClick?: (() => void) | undefined;
+  className?: string | undefined;
+  index?: number | undefined;
 }
 
 export function PlayingCard({

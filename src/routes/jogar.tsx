@@ -24,7 +24,7 @@ const DIFFS = PERSONAS.map((p) => p.id);
 
 export const Route = createFileRoute("/jogar")({
   validateSearch: (search: Record<string, unknown>): { ia: Difficulty } => {
-    const ia = String(search.ia ?? "estrategica") as Difficulty;
+    const ia = String(search['ia'] ?? "estrategica") as Difficulty;
     return { ia: DIFFS.includes(ia) ? ia : "estrategica" };
   },
   head: () => ({
