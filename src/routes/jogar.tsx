@@ -113,12 +113,19 @@ function Mesa() {
             </p>
           </div>
           <div className="flex gap-2">
+            <Link
+              to="/como-jogar"
+              className="rounded-full border px-4 py-2 text-sm transition-colors hover:bg-[var(--gold)]/10"
+            >
+              Como jogar
+            </Link>
             <button
               onClick={start}
               className="rounded-full border px-4 py-2 text-sm transition-colors hover:bg-[var(--gold)]/10"
             >
               Nova partida
             </button>
+
             <Link
               to="/"
               className="rounded-full border px-4 py-2 text-sm transition-colors hover:bg-[var(--gold)]/10"

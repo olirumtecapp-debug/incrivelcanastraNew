@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as CampanhaRouteImport } from './routes/campanha'
+import { Route as ComoJogarRouteImport } from './routes/como-jogar'
 import { Route as JogarRouteImport } from './routes/jogar'
 import { Route as PerfilRouteImport } from './routes/perfil'
 
@@ -22,6 +23,11 @@ const IndexRoute = IndexRouteImport.update({
 const CampanhaRoute = CampanhaRouteImport.update({
   id: '/campanha',
   path: '/campanha',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ComoJogarRoute = ComoJogarRouteImport.update({
+  id: '/como-jogar',
+  path: '/como-jogar',
   getParentRoute: () => rootRouteImport,
 } as any)
 const JogarRoute = JogarRouteImport.update({
@@ -38,12 +44,14 @@ const PerfilRoute = PerfilRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/campanha': typeof CampanhaRoute
+  '/como-jogar': typeof ComoJogarRoute
   '/jogar': typeof JogarRoute
   '/perfil': typeof PerfilRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/campanha': typeof CampanhaRoute
+  '/como-jogar': typeof ComoJogarRoute
   '/jogar': typeof JogarRoute
   '/perfil': typeof PerfilRoute
 }
@@ -51,20 +59,22 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/campanha': typeof CampanhaRoute
+  '/como-jogar': typeof ComoJogarRoute
   '/jogar': typeof JogarRoute
   '/perfil': typeof PerfilRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/campanha' | '/jogar' | '/perfil'
+  fullPaths: '/' | '/campanha' | '/como-jogar' | '/jogar' | '/perfil'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/campanha' | '/jogar' | '/perfil'
-  id: '__root__' | '/' | '/campanha' | '/jogar' | '/perfil'
+  to: '/' | '/campanha' | '/como-jogar' | '/jogar' | '/perfil'
+  id: '__root__' | '/' | '/campanha' | '/como-jogar' | '/jogar' | '/perfil'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   CampanhaRoute: typeof CampanhaRoute
+  ComoJogarRoute: typeof ComoJogarRoute
   JogarRoute: typeof JogarRoute
   PerfilRoute: typeof PerfilRoute
 }
@@ -83,6 +93,13 @@ declare module '@tanstack/react-router' {
       path: '/campanha'
       fullPath: '/campanha'
       preLoaderRoute: typeof CampanhaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/como-jogar': {
+      id: '/como-jogar'
+      path: '/como-jogar'
+      fullPath: '/como-jogar'
+      preLoaderRoute: typeof ComoJogarRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/jogar': {
@@ -105,6 +122,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   CampanhaRoute: CampanhaRoute,
+  ComoJogarRoute: ComoJogarRoute,
   JogarRoute: JogarRoute,
   PerfilRoute: PerfilRoute,
 }
