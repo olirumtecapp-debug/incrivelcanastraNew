@@ -50,6 +50,7 @@ function Mesa() {
   const persona = useMemo(() => personaById(ia), [ia]);
   const [state, setState] = useState<GameState | null>(null);
   const [selected, setSelected] = useState<string[]>([]);
+  const [showLog, setShowLog] = useState(false);
 
   const start = useCallback(() => {
     setSelected([]);
@@ -100,35 +101,38 @@ function Mesa() {
   };
 
   return (
-    <>
-      <Header />
-      <main className="mx-auto max-w-6xl px-3 pb-28 sm:px-4">
-        <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <h1 className="text-2xl font-semibold">
+    <div className="flex h-[100dvh] flex-col overflow-hidden">
+      <div className="shrink-0">
+        <Header />
+      </div>
+
+      <main className="mx-auto flex w-full max-w-6xl min-h-0 flex-1 flex-col gap-2 px-2 py-2 sm:px-4">
+        {/* Barra superior compacta */}
+        <div className="grid shrink-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
+          <div className="min-w-0">
+            <h1 className="truncate text-base font-semibold sm:text-xl">
               Mesa contra <span className="gold-text">{persona.name}</span>
             </h1>
-            <p className="text-sm text-muted-foreground">
+            <p className="truncate text-[11px] text-muted-foreground sm:text-xs">
               {persona.title} · {persona.description}
             </p>
           </div>
-          <div className="flex gap-2">
+          <div className="flex shrink-0 gap-1.5 text-xs">
             <Link
               to="/como-jogar"
-              className="rounded-full border px-4 py-2 text-sm transition-colors hover:bg-[var(--gold)]/10"
+              className="rounded-full border px-3 py-1.5 transition-colors hover:bg-[var(--gold)]/10"
             >
               Como jogar
             </Link>
             <button
               onClick={start}
-              className="rounded-full border px-4 py-2 text-sm transition-colors hover:bg-[var(--gold)]/10"
+              className="rounded-full border px-3 py-1.5 transition-colors hover:bg-[var(--gold)]/10"
             >
-              Nova partida
+              Nova
             </button>
-
             <Link
               to="/"
-              className="rounded-full border px-4 py-2 text-sm transition-colors hover:bg-[var(--gold)]/10"
+              className="rounded-full border px-3 py-1.5 transition-colors hover:bg-[var(--gold)]/10"
             >
               Sair
             </Link>
@@ -136,21 +140,21 @@ function Mesa() {
         </div>
 
         {/* Mesa */}
-        <section className="mt-5 rounded-3xl border border-[var(--gold)]/25 bg-[radial-gradient(ellipse_at_center,var(--felt),var(--felt-deep))] p-4 shadow-[inset_0_2px_40px_rgba(0,0,0,0.55)] sm:p-6">
+        <section className="relative flex min-h-0 flex-1 flex-col gap-1 overflow-hidden rounded-2xl border border-[var(--gold)]/25 bg-[radial-gradient(ellipse_at_center,var(--felt),var(--felt-deep))] p-2 shadow-[inset_0_2px_40px_rgba(0,0,0,0.55)] sm:gap-2 sm:p-4">
           {/* Adversário */}
-          <div className="flex items-center justify-between gap-4">
-            <div className="flex items-center gap-3">
+          <div className="grid shrink-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
+            <div className="flex min-w-0 items-center gap-2">
               <div
-                className={`flex h-10 w-10 items-center justify-center rounded-full border ${state.turn === "ai" ? "border-[var(--gold)] animate-shimmer" : "border-white/20"}`}
+                className={`grid h-8 w-8 shrink-0 place-items-center rounded-full border ${state.turn === "ai" ? "animate-shimmer border-[var(--gold)]" : "border-white/20"}`}
               >
                 ♣
               </div>
-              <div>
-                <p className="font-semibold">{bot.name}</p>
-                <p className="text-xs text-white/70">{bot.hand.length} cartas na mão</p>
+              <div className="min-w-0">
+                <p className="truncate text-sm font-semibold">{bot.name}</p>
+                <p className="text-[11px] text-white/70">{bot.hand.length} cartas na mão</p>
               </div>
             </div>
-            <div className="flex -space-x-6">
+            <div className="flex -space-x-5 sm:-space-x-6">
               {bot.hand.slice(0, 8).map((c) => (
                 <PlayingCard key={c.id} faceDown small />
               ))}
@@ -160,36 +164,36 @@ function Mesa() {
           <MeldRow title="Jogos do adversário" melds={bot.melds} />
 
           {/* Centro */}
-          <div className="my-6 flex flex-wrap items-center justify-center gap-6">
+          <div className="flex min-h-0 flex-1 flex-wrap items-center justify-center gap-4 sm:gap-8">
             <button
               disabled={!myTurn || state.phase !== "draw"}
               onClick={() => act(drawFromStock(state, "player"), "Você já comprou nesta rodada.")}
-              className="flex flex-col items-center gap-2 disabled:opacity-50"
+              className="flex flex-col items-center gap-1 disabled:opacity-50"
             >
               <PlayingCard faceDown />
-              <span className="text-xs text-white/80">Monte ({state.stock.length})</span>
+              <span className="text-[11px] text-white/80">Monte ({state.stock.length})</span>
             </button>
 
             <button
               disabled={!myTurn || state.phase !== "draw" || state.discard.length === 0}
               onClick={() => act(takeDiscardPile(state, "player"), "Não é possível pegar o lixo.")}
-              className="flex flex-col items-center gap-2 disabled:opacity-50"
+              className="flex flex-col items-center gap-1 disabled:opacity-50"
             >
               {state.discard.length ? (
                 <PlayingCard card={state.discard[state.discard.length - 1]} />
               ) : (
-                <div className="h-24 w-16 rounded-xl border border-dashed border-white/30 sm:h-28 sm:w-19" />
+                <div className="aspect-[5/7] h-[clamp(60px,11vh,116px)] rounded-[12%] border border-dashed border-white/30" />
               )}
-              <span className="text-xs text-white/80">Lixo ({state.discard.length})</span>
+              <span className="text-[11px] text-white/80">Lixo ({state.discard.length})</span>
             </button>
 
-            <div className="flex flex-col items-center gap-2">
-              <div className="flex -space-x-8">
+            <div className="flex flex-col items-center gap-1">
+              <div className="flex -space-x-7">
                 {state.mortos.map((_, i) => (
                   <PlayingCard key={i} faceDown />
                 ))}
               </div>
-              <span className="text-xs text-white/80">Mortos ({state.mortos.length})</span>
+              <span className="text-[11px] text-white/80">Mortos ({state.mortos.length})</span>
             </div>
           </div>
 
@@ -207,13 +211,13 @@ function Mesa() {
           />
 
           {/* Mão */}
-          <div className="mt-6">
-            <div className="flex items-center justify-between">
-              <p className="text-sm text-white/80">
+          <div className="shrink-0">
+            <div className="flex items-center justify-between gap-2">
+              <p className="truncate text-[11px] text-white/80">
                 Sua mão · {me.hand.length} cartas
                 {me.tookMorto && " · morto pego"}
               </p>
-              <p className="text-xs text-white/70">
+              <p className="truncate text-[11px] text-white/70">
                 {state.phase === "over"
                   ? "Rodada encerrada"
                   : myTurn
@@ -223,7 +227,7 @@ function Mesa() {
                     : "Vez do adversário…"}
               </p>
             </div>
-            <div className="mt-3 flex flex-wrap justify-center gap-1.5 sm:-space-x-2 sm:gap-0">
+            <div className="mt-1 flex justify-center -space-x-3 px-1 pt-3 sm:-space-x-2">
               {hand.map((c, i) => (
                 <PlayingCard
                   key={c.id}
@@ -238,82 +242,88 @@ function Mesa() {
         </section>
 
         {/* Ações */}
-        <div className="glass fixed inset-x-0 bottom-0 z-20 border-t px-4 py-3">
-          <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3">
-            <p className="text-sm text-muted-foreground">
-              {selected.length} selecionada(s) · Sua pontuação estimada:{" "}
-              <span className="text-[var(--gold)]">{scoreOf(state, "player")}</span>
-            </p>
-            <div className="flex flex-wrap gap-2">
+        <div className="relative flex shrink-0 flex-wrap items-center justify-between gap-2">
+          <p className="text-[11px] text-muted-foreground sm:text-sm">
+            {selected.length} selecionada(s) · Pontuação:{" "}
+            <span className="text-[var(--gold)]">{scoreOf(state, "player")}</span>
+            <button
+              onClick={() => setShowLog((v) => !v)}
+              className="ml-2 underline underline-offset-4 hover:text-foreground"
+            >
+              Histórico
+            </button>
+          </p>
+          <div className="flex flex-wrap gap-2 text-xs sm:text-sm">
+            <button
+              disabled={!myTurn || state.phase !== "play" || !canMeld(me.hand, selected)}
+              onClick={() =>
+                act(
+                  createMeld(state, "player", selected),
+                  "Sequência inválida — mesmo naipe, mínimo 3 cartas.",
+                )
+              }
+              className="rounded-full bg-[var(--gold)] px-4 py-1.5 font-semibold text-[var(--primary-foreground)] disabled:opacity-40"
+            >
+              Baixar jogo
+            </button>
+            <button
+              disabled={!myTurn || state.phase !== "play" || selected.length !== 1}
+              onClick={() => act(discardCard(state, "player", selected[0]!))}
+              className="rounded-full border px-4 py-1.5 disabled:opacity-40"
+            >
+              Descartar
+            </button>
+            <button
+              disabled={state.phase === "over"}
+              onClick={() => act(endRound(state, "ai"))}
+              className="rounded-full border px-4 py-1.5 text-muted-foreground disabled:opacity-40"
+            >
+              Desistir
+            </button>
+          </div>
+
+          {showLog && (
+            <div className="glass animate-rise absolute bottom-full left-0 z-30 mb-2 max-h-[40vh] w-full max-w-md overflow-y-auto rounded-2xl p-4 text-sm">
+              <p className="mb-2 font-medium">Histórico da mesa</p>
+              <ul className="space-y-1 text-muted-foreground">
+                {state.log.map((l, i) => (
+                  <li key={i}>· {l}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
+      </main>
+
+      {state.phase === "over" && (
+        <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/70 p-4">
+          <div className="glass animate-rise w-full max-w-md rounded-3xl p-8 text-center">
+            <h2 className="gold-text text-3xl font-bold">
+              {state.winner === "player" ? "Você bateu!" : `${bot.name} bateu`}
+            </h2>
+            <div className="mt-5 space-y-2 text-sm">
+              <p>
+                Você: <span className="text-[var(--gold)]">{me.score}</span> pontos
+              </p>
+              <p>
+                {bot.name}: <span className="text-[var(--gold)]">{bot.score}</span> pontos
+              </p>
+            </div>
+            <div className="mt-6 flex justify-center gap-2">
               <button
-                disabled={!myTurn || state.phase !== "play" || !canMeld(me.hand, selected)}
-                onClick={() =>
-                  act(
-                    createMeld(state, "player", selected),
-                    "Sequência inválida — mesmo naipe, mínimo 3 cartas.",
-                  )
-                }
-                className="rounded-full bg-[var(--gold)] px-5 py-2 text-sm font-semibold text-[var(--primary-foreground)] disabled:opacity-40"
+                onClick={start}
+                className="rounded-full bg-[var(--gold)] px-5 py-2 font-semibold text-[var(--primary-foreground)]"
               >
-                Baixar jogo
+                Jogar de novo
               </button>
-              <button
-                disabled={!myTurn || state.phase !== "play" || selected.length !== 1}
-                onClick={() => act(discardCard(state, "player", selected[0]!))}
-                className="rounded-full border px-5 py-2 text-sm disabled:opacity-40"
-              >
-                Descartar
-              </button>
-              <button
-                disabled={state.phase === "over"}
-                onClick={() => act(endRound(state, "ai"))}
-                className="rounded-full border px-5 py-2 text-sm text-muted-foreground disabled:opacity-40"
-              >
-                Desistir
-              </button>
+              <Link to="/perfil" className="rounded-full border px-5 py-2">
+                Estatísticas
+              </Link>
             </div>
           </div>
         </div>
-
-        {state.phase === "over" && (
-          <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/70 p-4">
-            <div className="glass animate-rise w-full max-w-md rounded-3xl p-8 text-center">
-              <h2 className="gold-text text-3xl font-bold">
-                {state.winner === "player" ? "Você bateu!" : `${bot.name} bateu`}
-              </h2>
-              <div className="mt-5 space-y-2 text-sm">
-                <p>
-                  Você: <span className="text-[var(--gold)]">{me.score}</span> pontos
-                </p>
-                <p>
-                  {bot.name}: <span className="text-[var(--gold)]">{bot.score}</span> pontos
-                </p>
-              </div>
-              <div className="mt-6 flex justify-center gap-2">
-                <button
-                  onClick={start}
-                  className="rounded-full bg-[var(--gold)] px-5 py-2 font-semibold text-[var(--primary-foreground)]"
-                >
-                  Jogar de novo
-                </button>
-                <Link to="/perfil" className="rounded-full border px-5 py-2">
-                  Estatísticas
-                </Link>
-              </div>
-            </div>
-          </div>
-        )}
-
-        <details className="glass mt-6 rounded-2xl p-4 text-sm">
-          <summary className="cursor-pointer font-medium">Histórico da mesa</summary>
-          <ul className="mt-3 space-y-1 text-muted-foreground">
-            {state.log.map((l, i) => (
-              <li key={i}>· {l}</li>
-            ))}
-          </ul>
-        </details>
-      </main>
-    </>
+      )}
+    </div>
   );
 }
 
@@ -331,10 +341,12 @@ function MeldRow({
   appendable?: (m: GameState["players"]["ai"]["melds"][number]) => boolean;
 }) {
   return (
-    <div className="mt-4">
-      <p className="text-xs tracking-widest text-white/60 uppercase">{title}</p>
-      <div className="mt-2 flex flex-wrap gap-3">
-        {melds.length === 0 && <p className="text-sm text-white/50">Nenhum jogo baixado.</p>}
+    <div className="shrink-0">
+      <p className="text-[10px] tracking-widest text-white/60 uppercase">{title}</p>
+      <div className="mt-1 flex gap-2 overflow-x-auto pb-1">
+        {melds.length === 0 && (
+          <p className="text-xs text-white/50">Nenhum jogo baixado.</p>
+        )}
         {melds.map((m) => {
           const ok = highlight && appendable?.(m);
           const Comp = onMeldClick ? "button" : "div";
@@ -343,18 +355,18 @@ function MeldRow({
               key={m.id}
               type={onMeldClick ? "button" : undefined}
               onClick={onMeldClick ? () => onMeldClick(m.id) : undefined}
-              className={`rounded-xl border p-2 text-left transition-all ${
+              className={`shrink-0 rounded-xl border p-1.5 text-left transition-all ${
                 ok ? "border-[var(--gold)] shadow-[0_0_20px_-6px_var(--gold)]" : "border-white/15"
               } ${isCanastra(m) ? "bg-[var(--gold)]/10" : "bg-black/20"}`}
             >
-              <div className="flex -space-x-4">
+              <div className="flex -space-x-3">
                 {m.cards.map((c, i) => (
                   <PlayingCard key={c.id} card={c} small index={i} />
                 ))}
               </div>
-              <p className="mt-1 text-[11px] text-white/70">
+              <p className="mt-1 text-[10px] text-white/70">
                 {SUIT_SYMBOL[m.suit]} {m.cards.length} cartas
-                {isCanastra(m) && (isClean(m) ? " · canastra limpa" : " · canastra suja")}
+                {isCanastra(m) && (isClean(m) ? " · limpa" : " · suja")}
               </p>
             </Comp>
           );
