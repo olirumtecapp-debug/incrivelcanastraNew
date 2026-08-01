@@ -15,6 +15,7 @@ import { Route as ComoJogarRouteImport } from './routes/como-jogar'
 import { Route as JogarRouteImport } from './routes/jogar'
 import { Route as OnlineRouteImport } from './routes/online'
 import { Route as PerfilRouteImport } from './routes/perfil'
+import { Route as SalaRouteImport } from './routes/sala'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -46,6 +47,11 @@ const PerfilRoute = PerfilRouteImport.update({
   path: '/perfil',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SalaRoute = SalaRouteImport.update({
+  id: '/sala',
+  path: '/sala',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -54,6 +60,7 @@ export interface FileRoutesByFullPath {
   '/jogar': typeof JogarRoute
   '/online': typeof OnlineRoute
   '/perfil': typeof PerfilRoute
+  '/sala': typeof SalaRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -62,6 +69,7 @@ export interface FileRoutesByTo {
   '/jogar': typeof JogarRoute
   '/online': typeof OnlineRoute
   '/perfil': typeof PerfilRoute
+  '/sala': typeof SalaRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -71,13 +79,27 @@ export interface FileRoutesById {
   '/jogar': typeof JogarRoute
   '/online': typeof OnlineRoute
   '/perfil': typeof PerfilRoute
+  '/sala': typeof SalaRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    '/' | '/campanha' | '/como-jogar' | '/jogar' | '/online' | '/perfil'
+    | '/'
+    | '/campanha'
+    | '/como-jogar'
+    | '/jogar'
+    | '/online'
+    | '/perfil'
+    | '/sala'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/campanha' | '/como-jogar' | '/jogar' | '/online' | '/perfil'
+  to:
+    | '/'
+    | '/campanha'
+    | '/como-jogar'
+    | '/jogar'
+    | '/online'
+    | '/perfil'
+    | '/sala'
   id:
     | '__root__'
     | '/'
@@ -86,6 +108,7 @@ export interface FileRouteTypes {
     | '/jogar'
     | '/online'
     | '/perfil'
+    | '/sala'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -95,6 +118,7 @@ export interface RootRouteChildren {
   JogarRoute: typeof JogarRoute
   OnlineRoute: typeof OnlineRoute
   PerfilRoute: typeof PerfilRoute
+  SalaRoute: typeof SalaRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -141,6 +165,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PerfilRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/sala': {
+      id: '/sala'
+      path: '/sala'
+      fullPath: '/sala'
+      preLoaderRoute: typeof SalaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -151,6 +182,7 @@ const rootRouteChildren: RootRouteChildren = {
   JogarRoute: JogarRoute,
   OnlineRoute: OnlineRoute,
   PerfilRoute: PerfilRoute,
+  SalaRoute: SalaRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
