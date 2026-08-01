@@ -63,7 +63,7 @@ function combos(cards: Card[], size: number): Card[][] {
       out.push([...acc]);
       return;
     }
-    for (let i = start; i < cards.length; i++) rec(i + 1, [...acc, cards[i]]);
+    for (let i = start; i < cards.length; i++) rec(i + 1, [...acc, cards[i]!]);
   };
   rec(0, []);
   return out;
@@ -133,5 +133,5 @@ export function playAiTurn(state: GameState, persona: AiPersona): GameState {
     (a, b) => cardValue(a) + (isWild(a) ? 100 : 0) - (cardValue(b) + (isWild(b) ? 100 : 0)),
   );
   const noise = Math.random() > persona.skill ? Math.min(2, sorted.length - 1) : 0;
-  return discardCard(s, "ai", sorted[noise].id);
+  return discardCard(s, "ai", sorted[noise]!.id);
 }

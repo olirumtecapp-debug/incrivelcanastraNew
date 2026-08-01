@@ -53,7 +53,7 @@ export function shuffle<T>(arr: T[]): T[] {
   const a = [...arr];
   for (let i = a.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]];
+    [a[i], a[j]] = [a[j]!, a[i]!];
   }
   return a;
 }
@@ -71,7 +71,7 @@ export function validateMeld(cards: Card[]): { valid: boolean; suit?: Suit; reas
 
   const suits = new Set(naturals.map((c) => c.suit));
   if (suits.size > 1) return { valid: false, reason: "Todas as cartas devem ser do mesmo naipe." };
-  const suit = naturals[0].suit as Suit;
+  const suit = naturals[0]!.suit as Suit;
 
   // curinga de 2 precisa ser do mesmo naipe apenas se usado como natural — aqui é sempre curinga
   const size = cards.length;

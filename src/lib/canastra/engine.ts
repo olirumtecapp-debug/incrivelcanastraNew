@@ -116,7 +116,7 @@ export function discardCard(state: GameState, who: PlayerId, cardId: string): Ga
   const p = s.players[who];
   const idx = p.hand.findIndex((c) => c.id === cardId);
   if (idx < 0) return state;
-  const [card] = p.hand.splice(idx, 1);
+  const card = p.hand.splice(idx, 1)[0]!;
   s.discard.push(card);
   push(s, `${p.name} descartou ${cardLabel(card)}.`);
 
