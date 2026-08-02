@@ -36,6 +36,9 @@ export function Header() {
             </Link>
           ))}
         </nav>
+        <div className="flex shrink-0 items-center ml-2">
+          <ColorPaletteMenu />
+        </div>
       </div>
     </header>
   );
