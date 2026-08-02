@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Header } from "@/components/layout/Header";
+import { Footer } from "@/components/layout/Footer";
 import { PERSONAS } from "@/lib/canastra/ai";
 
 export const Route = createFileRoute("/campanha")({
@@ -75,6 +76,7 @@ function Campanha() {
           })}
         </div>
       </main>
+      <Footer />
     </>
   );
 }
