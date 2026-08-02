@@ -68,7 +68,7 @@ export function Footer() {
             <p className="text-sm text-muted-foreground leading-relaxed">
               Acesse pelo endereço: <br />
               <code className="mt-1 block rounded bg-black/30 p-2 text-[11px] text-[var(--gold)]">
-                {typeof window !== 'undefined' ? window.location.origin : 'incrivelcanastra.lovable.app'}
+                {'incrivelcanastra.lovable.app'}
               </code>
             </p>
             <p className="text-xs text-muted-foreground">
