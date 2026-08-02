@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
-import { Crown } from "lucide-react";
+import { Crown, Menu, X } from "lucide-react";
 import { ColorPaletteMenu } from "../game/ColorPaletteMenu";
+import { useState } from "react";
 
 const links = [
   { to: "/", label: "Lobby" },
