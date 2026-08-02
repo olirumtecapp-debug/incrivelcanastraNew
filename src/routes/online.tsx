@@ -2,6 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Header } from "@/components/layout/Header";
+import { Footer } from "@/components/layout/Footer";
 import { createRoom, getPlayerName, joinRoom, setPlayerName } from "@/lib/online";
 
 export const Route = createFileRoute("/online")({
@@ -127,6 +128,7 @@ function Online() {
             </button>
           </div>
         </div>
+        <Footer />
       </main>
     </div>
   );

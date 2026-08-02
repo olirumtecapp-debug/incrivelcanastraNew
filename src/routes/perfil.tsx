@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Header } from "@/components/layout/Header";
+import { Footer } from "@/components/layout/Footer";
 
 export const Route = createFileRoute("/perfil")({
   head: () => ({
@@ -108,6 +109,7 @@ function Perfil() {
           Zerar estatísticas
         </button>
       </main>
+      <Footer />
     </>
   );
 }

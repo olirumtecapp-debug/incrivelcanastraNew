@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { CheckCircle2, XCircle } from "lucide-react";
 import { Header } from "@/components/layout/Header";
+import { Footer } from "@/components/layout/Footer";
 import { PlayingCard } from "@/components/game/PlayingCard";
 import type { Card } from "@/lib/canastra/types";
 
@@ -217,6 +218,7 @@ function ComoJogar() {
           </Link>
         </div>
       </main>
+      <Footer />
     </>
   );
 }
