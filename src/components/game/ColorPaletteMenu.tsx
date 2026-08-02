@@ -108,7 +108,7 @@ export function ColorPaletteMenu() {
       {isOpen && (
         <>
           <div 
-            className="fixed inset-0 z-40 bg-black/20 backdrop-blur-sm"
+            className="fixed inset-0 z-[90] bg-black/20 backdrop-blur-sm"
             onClick={() => setIsOpen(false)}
           />
           <div className="absolute right-0 top-12 z-[100] w-64 animate-rise rounded-2xl border bg-card p-4 shadow-2xl overflow-hidden">
