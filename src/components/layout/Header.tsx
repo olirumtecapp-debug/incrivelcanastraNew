@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { Crown } from "lucide-react";
+import { ColorPaletteMenu } from "../game/ColorPaletteMenu";
 
 const links = [
   { to: "/", label: "Lobby" },
@@ -35,6 +36,9 @@ export function Header() {
             </Link>
           ))}
         </nav>
+        <div className="flex shrink-0 items-center ml-2">
+          <ColorPaletteMenu />
+        </div>
       </div>
     </header>
   );
