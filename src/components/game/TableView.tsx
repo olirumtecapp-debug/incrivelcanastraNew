@@ -152,7 +152,7 @@ export function TableView({
                   : waitingLabel}
             </p>
           </div>
-          <div className="mt-1 flex justify-center -space-x-3 px-1 pt-3 pb-2 sm:-space-x-2">
+          <div className="mt-1 flex justify-center -space-x-5 px-1 pt-3 pb-2 sm:-space-x-3 md:-space-x-2">
             {hand.map((c, i) => (
               <PlayingCard
                 key={c.id}

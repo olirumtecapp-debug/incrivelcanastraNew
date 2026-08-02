@@ -14,8 +14,8 @@ interface Props {
 
 /** Alturas fluidas: a mesa nunca precisa de rolagem. */
 const SIZE = {
-  md: "h-[clamp(64px,11vh,116px)] aspect-[5/7] text-[clamp(11px,1.6vh,16px)]",
-  sm: "h-[clamp(40px,6.4vh,68px)] aspect-[5/7] text-[clamp(8px,1.1vh,12px)]",
+  md: "h-[clamp(60px,10.5vh,110px)] aspect-[5/7] text-[clamp(10px,1.5vh,15px)]",
+  sm: "h-[clamp(36px,6vh,64px)] aspect-[5/7] text-[clamp(8px,1vh,11px)]",
 };
 
 export function PlayingCard({
