@@ -111,7 +111,7 @@ export function ColorPaletteMenu() {
             className="fixed inset-0 z-40 bg-black/20 backdrop-blur-sm"
             onClick={() => setIsOpen(false)}
           />
-          <div className="absolute right-0 top-12 z-50 w-64 animate-rise rounded-2xl border bg-card p-4 shadow-2xl overflow-hidden">
+          <div className="absolute right-0 top-12 z-[100] w-64 animate-rise rounded-2xl border bg-card p-4 shadow-2xl overflow-hidden">
             <div className="mb-3 flex items-center justify-between">
               <h3 className="text-sm font-bold uppercase tracking-wider text-[var(--gold)]">Paleta de Cores</h3>
               <button onClick={() => setIsOpen(false)} className="text-muted-foreground hover:text-foreground">
