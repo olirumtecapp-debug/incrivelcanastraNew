@@ -55,7 +55,7 @@ function Lobby() {
     <>
       <Header />
       <main className="mx-auto max-w-6xl px-4 pb-20">
-        {/* Espaço removido: "precisa de um menu de paleta de cores..." */}
+        
         <section className="animate-rise relative mt-10 overflow-hidden rounded-3xl border bg-gradient-to-br from-[var(--felt)]/45 to-transparent p-8 sm:p-12">
           <div className="animate-shimmer pointer-events-none absolute -top-24 -right-24 h-64 w-64 rounded-full bg-[var(--gold)]/20 blur-3xl" />
           <p className="text-xs tracking-[0.35em] text-[var(--gold)] uppercase">Clube privado</p>
