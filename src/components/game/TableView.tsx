@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from "react";
+import { useState, useEffect, type ReactNode } from "react";
 import { toast } from "sonner";
 import { PlayingCard } from "@/components/game/PlayingCard";
 import {
