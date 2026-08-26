@@ -382,6 +382,14 @@ export function TableView({
           >
             Desistir
           </button>
+          <button
+            disabled={state.phase === "over"}
+            onClick={() => triggerInstantWin(seat)}
+            title="Clique para bater a partida e testar a tela de vitória imediatamente"
+            className="rounded-full border border-amber-500/50 bg-amber-500/15 px-3.5 py-1.5 text-xs font-semibold text-amber-300 hover:bg-amber-500/25 active:scale-95 transition-all cursor-pointer shadow-md"
+          >
+            ⚡ Ganhar (Teste)
+          </button>
         </div>
 
         {showLog && (
