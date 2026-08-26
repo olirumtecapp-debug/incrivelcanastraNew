@@ -1,6 +1,7 @@
 import { useState, type ReactNode } from "react";
 import { toast } from "sonner";
 import { PlayingCard } from "@/components/game/PlayingCard";
+import { ComoJogarModal } from "@/components/game/ComoJogarModal";
 import {
   addToMeld,
   canAppend,
@@ -12,8 +13,9 @@ import {
   scoreOf,
   takeDiscardPile,
 } from "@/lib/canastra/engine";
-import { isCanastra, isClean, sortHand, SUIT_SYMBOL } from "@/lib/canastra/rules";
-import type { GameState, Meld, PlayerId } from "@/lib/canastra/types";
+import { isCanastra, isClean, sortHand, SUIT_SYMBOL, validateMeld } from "@/lib/canastra/rules";
+import type { Card, GameState, Meld, PlayerId } from "@/lib/canastra/types";
+import { HelpCircle } from "lucide-react";
 
 interface Props {
   state: GameState;
@@ -40,6 +42,7 @@ export function TableView({
 }: Props) {
   const [selected, setSelected] = useState<string[]>([]);
   const [showLog, setShowLog] = useState(false);
+  const [showRulesModal, setShowRulesModal] = useState(false);
 
   const oppSeat: PlayerId = seat === "player" ? "ai" : "player";
   const me = state.players[seat];
@@ -59,8 +62,131 @@ export function TableView({
     onState(next);
   };
 
+  const handleDrawFromStock = () => {
+    if (state.phase === "over") {
+      toast.info("A rodada foi encerrada.");
+      return;
+    }
+    if (!myTurn) {
+      toast.warning("Aguarde a vez do adversário.");
+      return;
+    }
+    if (state.phase !== "draw") {
+      toast.info("Você já comprou nesta rodada! Baixe jogos ou selecione 1 carta para descartar.");
+      return;
+    }
+    act(drawFromStock(state, seat));
+  };
+
+  const handleTakeDiscard = () => {
+    if (state.phase === "over") {
+      toast.info("A rodada foi encerrada.");
+      return;
+    }
+    if (state.discard.length === 0) {
+      toast.info("O Lixo está vazio. Compre uma carta do Monte!");
+      return;
+    }
+    if (!myTurn) {
+      toast.warning("Aguarde a vez do adversário.");
+      return;
+    }
+    if (state.phase !== "draw") {
+      toast.info("Você já comprou nesta rodada! Baixe jogos ou selecione 1 carta para descartar.");
+      return;
+    }
+    act(takeDiscardPile(state, seat));
+  };
+
+  const handleCreateMeld = () => {
+    if (state.phase === "over") {
+      toast.info("A rodada foi encerrada.");
+      return;
+    }
+    if (!myTurn) {
+      toast.warning("Aguarde a sua vez para jogar.");
+      return;
+    }
+    if (state.phase === "draw") {
+      toast.warning("Compre uma carta do Monte ou Lixo antes de baixar jogos.");
+      return;
+    }
+    if (selected.length === 0) {
+      toast.info("Selecione cartas da sua mão para formar uma sequência de mesmo naipe.");
+      return;
+    }
+    if (selected.length < 3) {
+      toast.warning(
+        `Você selecionou apenas ${selected.length} carta(s). Para baixar um jogo, selecione no mínimo 3 cartas do mesmo naipe em sequência.`,
+      );
+      return;
+    }
+    const cards = selected.map((id) => me.hand.find((c) => c.id === id)).filter(Boolean) as Card[];
+    const res = validateMeld(cards);
+    if (!res.valid) {
+      toast.error(
+        res.reason ||
+          "Sequência inválida! As cartas precisam ser do mesmo naipe e em ordem consecutiva (ex: 4, 5, 6 ou com curinga 2/★).",
+      );
+      return;
+    }
+    act(createMeld(state, seat, selected));
+  };
+
+  const handleDiscard = () => {
+    if (state.phase === "over") {
+      toast.info("A rodada foi encerrada.");
+      return;
+    }
+    if (!myTurn) {
+      toast.warning("Aguarde a sua vez para descartar.");
+      return;
+    }
+    if (state.phase === "draw") {
+      toast.warning("Compre uma carta do Monte ou Lixo antes de descartar.");
+      return;
+    }
+    if (selected.length === 0) {
+      toast.warning("Selecione 1 carta da sua mão para descartar e passar a vez.");
+      return;
+    }
+    if (selected.length > 1) {
+      toast.warning(
+        `Você selecionou ${selected.length} cartas. Para descartar, selecione apenas 1 carta da sua mão.`,
+      );
+      return;
+    }
+    act(discardCard(state, seat, selected[0]!));
+  };
+
+  const handleMeldClick = (id: string) => {
+    if (state.phase === "over") return;
+    if (!myTurn) {
+      toast.warning("Aguarde a sua vez para jogar cartas.");
+      return;
+    }
+    if (state.phase === "draw") {
+      toast.warning("Compre uma carta do Monte ou Lixo antes de encaixar cartas na mesa.");
+      return;
+    }
+    if (selected.length === 0) {
+      toast.info("Selecione primeiro uma carta da sua mão para encaixar nesta sequência.");
+      return;
+    }
+    const targetMeld = me.melds.find((m) => m.id === id);
+    if (targetMeld && !canAppend(targetMeld, me.hand, selected)) {
+      toast.error(
+        "Essas cartas não encaixam neste jogo. Elas precisam continuar a sequência do mesmo naipe.",
+      );
+      return;
+    }
+    act(addToMeld(state, seat, id, selected), "Essas cartas não completam esse jogo.");
+  };
+
   return (
     <main className="mx-auto flex w-full max-w-6xl min-h-0 flex-1 flex-col gap-2 px-2 py-2 sm:px-4">
+      <ComoJogarModal open={showRulesModal} onOpenChange={setShowRulesModal} />
+
       <div className="grid shrink-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
         <div className="min-w-0">
           <h1 className="truncate text-base font-semibold sm:text-xl">{title}</h1>
@@ -68,7 +194,16 @@ export function TableView({
             <p className="truncate text-[11px] text-muted-foreground sm:text-xs">{subtitle}</p>
           )}
         </div>
-        <div className="flex shrink-0 gap-1.5 text-xs">{actions}</div>
+        <div className="flex shrink-0 items-center gap-1.5 text-xs">
+          <button
+            onClick={() => setShowRulesModal(true)}
+            className="flex items-center gap-1 rounded-full border border-[var(--gold)]/40 bg-[var(--gold)]/10 px-3 py-1.5 font-medium text-[var(--gold)] transition-colors hover:bg-[var(--gold)]/20"
+          >
+            <HelpCircle className="h-3.5 w-3.5" />
+            <span>Como jogar</span>
+          </button>
+          {actions}
+        </div>
       </div>
 
       <section className="relative flex min-h-0 flex-1 flex-col gap-1 overflow-hidden rounded-2xl border border-[var(--gold)]/25 bg-[radial-gradient(ellipse_at_center,var(--felt),var(--felt-deep))] p-2 shadow-[inset_0_2px_40px_rgba(0,0,0,0.55)] sm:gap-2 sm:p-4">
@@ -95,18 +230,24 @@ export function TableView({
 
         <div className="flex min-h-0 flex-1 flex-wrap items-center justify-center gap-4 sm:gap-8">
           <button
-            disabled={!myTurn || state.phase !== "draw"}
-            onClick={() => act(drawFromStock(state, seat), "Você já comprou nesta rodada.")}
-            className="flex flex-col items-center gap-1 disabled:opacity-50"
+            onClick={handleDrawFromStock}
+            className={`flex flex-col items-center gap-1 transition-opacity ${
+              myTurn && state.phase === "draw"
+                ? "cursor-pointer hover:scale-105"
+                : "opacity-60 cursor-pointer"
+            }`}
           >
             <PlayingCard faceDown />
             <span className="text-[11px] text-white/80">Monte ({state.stock.length})</span>
           </button>
 
           <button
-            disabled={!myTurn || state.phase !== "draw" || state.discard.length === 0}
-            onClick={() => act(takeDiscardPile(state, seat), "Não é possível pegar o lixo.")}
-            className="flex flex-col items-center gap-1 disabled:opacity-50"
+            onClick={handleTakeDiscard}
+            className={`flex flex-col items-center gap-1 transition-opacity ${
+              myTurn && state.phase === "draw" && state.discard.length > 0
+                ? "cursor-pointer hover:scale-105"
+                : "opacity-60 cursor-pointer"
+            }`}
           >
             {state.discard.length ? (
               <PlayingCard card={state.discard[state.discard.length - 1]} />
@@ -129,9 +270,7 @@ export function TableView({
         <MeldRow
           title="Seus jogos"
           melds={me.melds}
-          onMeldClick={(id) =>
-            act(addToMeld(state, seat, id, selected), "Essas cartas não completam esse jogo.")
-          }
+          onMeldClick={handleMeldClick}
           highlight={selected.length > 0 && myTurn}
           appendable={(m) => canAppend(m, me.hand, selected)}
         />
@@ -179,25 +318,29 @@ export function TableView({
         </p>
         <div className="flex flex-wrap gap-2 text-xs sm:text-sm">
           <button
-            disabled={!myTurn || state.phase !== "play" || !canMeld(me.hand, selected)}
-            onClick={() =>
-              act(createMeld(state, seat, selected), "Sequência inválida — mesmo naipe, mínimo 3 cartas.")
-            }
-            className="rounded-full bg-[var(--gold)] px-4 py-1.5 font-semibold text-[var(--primary-foreground)] disabled:opacity-40"
+            onClick={handleCreateMeld}
+            className={`rounded-full px-4 py-1.5 font-semibold transition-all cursor-pointer ${
+              myTurn && state.phase === "play" && selected.length >= 3
+                ? "bg-[var(--gold)] text-[var(--primary-foreground)] shadow-[0_0_15px_-3px_var(--gold)] scale-105"
+                : "bg-[var(--gold)]/70 text-[var(--primary-foreground)] opacity-60"
+            }`}
           >
             Baixar jogo
           </button>
           <button
-            disabled={!myTurn || state.phase !== "play" || selected.length !== 1}
-            onClick={() => act(discardCard(state, seat, selected[0]!))}
-            className="rounded-full border px-4 py-1.5 disabled:opacity-40"
+            onClick={handleDiscard}
+            className={`rounded-full border px-4 py-1.5 font-medium transition-all cursor-pointer ${
+              myTurn && state.phase === "play" && selected.length === 1
+                ? "border-[var(--gold)] bg-[var(--gold)]/20 text-white shadow-[0_0_12px_-3px_var(--gold)] scale-105"
+                : "border-white/20 opacity-60"
+            }`}
           >
             Descartar
           </button>
           <button
             disabled={state.phase === "over"}
             onClick={() => act(endRound(state, oppSeat))}
-            className="rounded-full border px-4 py-1.5 text-muted-foreground disabled:opacity-40"
+            className="rounded-full border px-4 py-1.5 text-muted-foreground disabled:opacity-40 cursor-pointer"
           >
             Desistir
           </button>
