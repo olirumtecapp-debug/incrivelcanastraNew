@@ -62,6 +62,55 @@ export function TableView({
     onState(next);
   };
 
+  const triggerInstantWin = (winner: PlayerId = seat) => {
+    if (state.phase === "over") return;
+    const s: GameState = JSON.parse(JSON.stringify(state));
+    const winningPlayer = s.players[winner];
+    if (winningPlayer.melds.length === 0) {
+      winningPlayer.melds.push({
+        id: "cheat_canastra_limpa",
+        suit: "H",
+        cards: [
+          { id: "c_cheat_1", suit: "H", rank: 3 },
+          { id: "c_cheat_2", suit: "H", rank: 4 },
+          { id: "c_cheat_3", suit: "H", rank: 5 },
+          { id: "c_cheat_4", suit: "H", rank: 6 },
+          { id: "c_cheat_5", suit: "H", rank: 7 },
+          { id: "c_cheat_6", suit: "H", rank: 8 },
+          { id: "c_cheat_7", suit: "H", rank: 9 },
+        ],
+      });
+    }
+    winningPlayer.hand = [];
+    winningPlayer.tookMorto = true;
+    const finalState = endRound(s, winner);
+    act(finalState);
+    toast.success(`🏆 Trapaça: Vitória imediata de ${winningPlayer.name}!`);
+  };
+
+  useEffect(() => {
+    const handleInstantWinEvent = (e: Event) => {
+      const customEvent = e as CustomEvent<{ winner?: PlayerId }>;
+      const targetWinner: PlayerId = customEvent.detail?.winner || seat;
+      triggerInstantWin(targetWinner);
+    };
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Atalho: Alt + W (Vencer partida imediatamente)
+      if (e.altKey && (e.key === "W" || e.key === "w")) {
+        e.preventDefault();
+        triggerInstantWin(seat);
+      }
+    };
+
+    window.addEventListener("ADMIN_INSTANT_WIN", handleInstantWinEvent);
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.removeEventListener("ADMIN_INSTANT_WIN", handleInstantWinEvent);
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [state, seat]);
+
   const handleDrawFromStock = () => {
     if (state.phase === "over") {
       toast.info("A rodada foi encerrada.");
