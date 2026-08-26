@@ -81,6 +81,7 @@ function Mesa() {
         state={state}
         seat="player"
         onState={setState}
+        onPlayAgain={start}
         title={
           <>
             Mesa contra <span className="gold-text">{persona.name}</span>
@@ -110,35 +111,6 @@ function Mesa() {
           </>
         }
       />
-
-      {state.phase === "over" && (
-        <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/70 p-4">
-          <div className="glass animate-rise w-full max-w-md rounded-3xl p-8 text-center">
-            <h2 className="gold-text text-3xl font-bold">
-              {state.winner === "player" ? "Você bateu!" : `${bot.name} bateu`}
-            </h2>
-            <div className="mt-5 space-y-2 text-sm">
-              <p>
-                Você: <span className="text-[var(--gold)]">{me.score}</span> pontos
-              </p>
-              <p>
-                {bot.name}: <span className="text-[var(--gold)]">{bot.score}</span> pontos
-              </p>
-            </div>
-            <div className="mt-6 flex justify-center gap-2">
-              <button
-                onClick={start}
-                className="rounded-full bg-[var(--gold)] px-5 py-2 font-semibold text-[var(--primary-foreground)]"
-              >
-                Jogar de novo
-              </button>
-              <Link to="/perfil" className="rounded-full border px-5 py-2">
-                Estatísticas
-              </Link>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

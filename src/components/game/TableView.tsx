@@ -26,6 +26,7 @@ interface Props {
   /** desabilita interação (ex.: aguardando adversário online) */
   locked?: boolean;
   waitingLabel?: string;
+  onPlayAgain?: () => void;
 }
 
 export function TableView({
@@ -37,9 +38,11 @@ export function TableView({
   actions,
   locked,
   waitingLabel = "Vez do adversário…",
+  onPlayAgain,
 }: Props) {
   const [selected, setSelected] = useState<string[]>([]);
   const [showLog, setShowLog] = useState(false);
+  const [hideRoundOverModal, setHideRoundOverModal] = useState(false);
 
   const oppSeat: PlayerId = seat === "player" ? "ai" : "player";
   const me = state.players[seat];
@@ -340,6 +343,140 @@ export function TableView({
                 <li key={i}>· {l}</li>
               ))}
             </ul>
+          </div>
+        )}
+
+        {state.phase === "over" && hideRoundOverModal && (
+          <button
+            onClick={() => setHideRoundOverModal(false)}
+            className="absolute bottom-full right-4 z-30 mb-3 rounded-full bg-[var(--gold)] px-4 py-1.5 text-xs font-bold text-[var(--primary-foreground)] shadow-lg cursor-pointer"
+          >
+            🏆 Ver Placar da Partida
+          </button>
+        )}
+
+        {state.phase === "over" && !hideRoundOverModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-fade-in">
+            <div className="glass animate-rise w-full max-w-lg rounded-3xl p-6 sm:p-8 text-center border border-[var(--gold)]/40 shadow-2xl">
+              {(() => {
+                const p1 = state.players.player;
+                const p2 = state.players.ai;
+                const isTie = p1.score === p2.score;
+                const winnerId = state.winner ?? (p1.score >= p2.score ? "player" : "ai");
+                const winnerObj = state.players[winnerId];
+                const didIWin = !isTie && winnerId === seat;
+
+                const getStats = (p: typeof me) => ({
+                  cleanCanastras: p.melds.filter(isClean).length,
+                  dirtyCanastras: p.melds.filter((m) => isCanastra(m) && !isClean(m)).length,
+                  cardsInHand: p.hand.length,
+                  tookMorto: p.tookMorto,
+                  didBatida: state.winner === p.id,
+                });
+
+                const meStats = getStats(me);
+                const oppStats = getStats(opp);
+
+                return (
+                  <>
+                    <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-[var(--gold)]/20 text-3xl">
+                      {isTie ? "🤝" : didIWin ? "🏆" : "🃏"}
+                    </div>
+
+                    <h2 className="gold-text text-2xl sm:text-3xl font-bold font-display">
+                      {isTie
+                        ? "Empate na Pontuação!"
+                        : didIWin
+                          ? `Parabéns, ${me.name}! Você Venceu!`
+                          : `Vitória de ${winnerObj.name}!`}
+                    </h2>
+
+                    <p className="mt-2 text-xs text-muted-foreground max-w-md mx-auto">
+                      No Buraco/Canastra, a vitória fica com quem somar mais pontos totais:
+                      canastras limpas (+200), canastras sujas (+100), cartas baixadas, desconto das cartas na mão e bônus de batida (+100).
+                    </p>
+
+                    {/* Placar Comparativo */}
+                    <div className="mt-6 grid grid-cols-2 gap-3 text-left">
+                      {/* Cartão Meu */}
+                      <div
+                        className={`rounded-2xl border p-4 transition-all ${
+                          (didIWin || (isTie && seat === "player"))
+                            ? "border-[var(--gold)] bg-[var(--gold)]/10 shadow-[0_0_15px_-4px_var(--gold)]"
+                            : "border-white/10 bg-white/5"
+                        }`}
+                      >
+                        <div className="flex items-center justify-between">
+                          <p className="font-semibold text-sm truncate">{me.name}</p>
+                          {(didIWin || isTie) && <span className="text-xs">🏆</span>}
+                        </div>
+                        <p className="gold-text mt-1 text-2xl sm:text-3xl font-bold font-display">
+                          {me.score} <span className="text-xs font-sans text-muted-foreground font-normal">pts</span>
+                        </p>
+                        <div className="mt-3 space-y-1 text-[11px] text-muted-foreground">
+                          <p>· Canastras limpas: <span className="text-white font-medium">{meStats.cleanCanastras} (+{meStats.cleanCanastras * 200})</span></p>
+                          <p>· Canastras sujas: <span className="text-white font-medium">{meStats.dirtyCanastras} (+{meStats.dirtyCanastras * 100})</span></p>
+                          <p>· Cartas na mão: <span className="text-white font-medium">{meStats.cardsInHand}</span></p>
+                          <p>· Pegou morto: <span className="text-white font-medium">{meStats.tookMorto ? "Sim" : "Não (-100)"}</span></p>
+                          {meStats.didBatida && <p className="text-[var(--gold)] font-medium">· Bateu a partida (+100)</p>}
+                        </div>
+                      </div>
+
+                      {/* Cartão Adversário */}
+                      <div
+                        className={`rounded-2xl border p-4 transition-all ${
+                          (!didIWin && !isTie)
+                            ? "border-[var(--gold)] bg-[var(--gold)]/10 shadow-[0_0_15px_-4px_var(--gold)]"
+                            : "border-white/10 bg-white/5"
+                        }`}
+                      >
+                        <div className="flex items-center justify-between">
+                          <p className="font-semibold text-sm truncate">{opp.name}</p>
+                          {!didIWin && !isTie && <span className="text-xs">🏆</span>}
+                        </div>
+                        <p className="gold-text mt-1 text-2xl sm:text-3xl font-bold font-display">
+                          {opp.score} <span className="text-xs font-sans text-muted-foreground font-normal">pts</span>
+                        </p>
+                        <div className="mt-3 space-y-1 text-[11px] text-muted-foreground">
+                          <p>· Canastras limpas: <span className="text-white font-medium">{oppStats.cleanCanastras} (+{oppStats.cleanCanastras * 200})</span></p>
+                          <p>· Canastras sujas: <span className="text-white font-medium">{oppStats.dirtyCanastras} (+{oppStats.dirtyCanastras * 100})</span></p>
+                          <p>· Cartas na mão: <span className="text-white font-medium">{oppStats.cardsInHand}</span></p>
+                          <p>· Pegou morto: <span className="text-white font-medium">{oppStats.tookMorto ? "Sim" : "Não (-100)"}</span></p>
+                          {oppStats.didBatida && <p className="text-[var(--gold)] font-medium">· Bateu a partida (+100)</p>}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Botões de Ação */}
+                    <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+                      {onPlayAgain && (
+                        <button
+                          onClick={() => {
+                            setHideRoundOverModal(false);
+                            onPlayAgain();
+                          }}
+                          className="rounded-full bg-[var(--gold)] px-6 py-2.5 text-xs sm:text-sm font-bold text-[var(--primary-foreground)] shadow-lg hover:brightness-110 active:scale-95 transition-all cursor-pointer"
+                        >
+                          Jogar Novamente
+                        </button>
+                      )}
+                      <button
+                        onClick={() => setHideRoundOverModal(true)}
+                        className="rounded-full border border-white/20 px-4 py-2 text-xs sm:text-sm font-medium hover:bg-white/10 transition-colors cursor-pointer"
+                      >
+                        Examinar Mesa
+                      </button>
+                      <a
+                        href="/"
+                        className="rounded-full border border-white/20 px-4 py-2 text-xs sm:text-sm font-medium hover:bg-white/10 transition-colors"
+                      >
+                        Sair para o Início
+                      </a>
+                    </div>
+                  </>
+                );
+              })()}
+            </div>
           </div>
         )}
       </div>

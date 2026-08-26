@@ -188,6 +188,7 @@ function Sala() {
         state={room.state}
         seat={seat}
         onState={onState}
+        onPlayAgain={isHost ? () => void deal() : undefined}
         title={
           <>
             Sala <span className="gold-text">{room.code}</span> · contra {oppName}
