@@ -8,6 +8,8 @@ import type { GameState, PlayerId } from "@/lib/canastra/types";
 import {
   fetchRoom,
   getPlayerId,
+  getPlayerName,
+  joinRoom,
   pushRoomState,
   subscribeRoom,
   type Room,
@@ -55,19 +57,40 @@ function Sala() {
     };
   }, [code]);
 
-  const isHost = !!room && room.host_id === playerId;
-  const isGuest = !!room && room.guest_id === playerId;
+  useEffect(() => {
+    if (!room || loading) return;
+    if (
+      String(room.host_id) !== String(playerId) &&
+      String(room.guest_id) !== String(playerId) &&
+      (room.status === "waiting" || !room.guest_id)
+    ) {
+      void joinRoom(code, getPlayerName())
+        .then((r) => {
+          setRoom(r);
+          toast.success("Você entrou na sala!");
+        })
+        .catch(() => {});
+    }
+  }, [room, loading, playerId, code]);
+
+  const isHost = !!room && String(room.host_id) === String(playerId);
+  const isGuest = !!room && String(room.guest_id) === String(playerId);
   const seat: PlayerId = isHost ? "player" : "ai";
 
   const deal = useCallback(async () => {
-    if (!room?.guest_id) return;
+    if (!room?.guest_id) {
+      toast.warning("Aguarde o segundo jogador entrar na sala.");
+      return;
+    }
     const state = newGame({
-      playerName: room.host_name,
-      aiName: room.guest_name ?? "Convidado",
+      playerName: room.host_name || "Jogador 1",
+      aiName: room.guest_name || "Jogador 2",
       openMorto: true,
     });
     try {
-      await pushRoomState(room.code, state);
+      const updated = await pushRoomState(room.code, state, "playing");
+      setRoom(updated);
+      toast.success("Cartas distribuídas! A partida começou.");
     } catch {
       toast.error("Não foi possível iniciar a partida.");
     }
@@ -102,10 +125,33 @@ function Sala() {
   if (!isHost && !isGuest) {
     return (
       <Shell>
-        Você não faz parte desta sala.{" "}
-        <Link to="/online" className="underline underline-offset-4">
-          Entrar com código
-        </Link>
+        <p className="text-sm font-semibold">Sala {code}</p>
+        <p className="mt-2 text-xs text-muted-foreground">
+          {room.status === "waiting"
+            ? "Esta sala está aguardando um jogador."
+            : "Você não faz parte desta sala."}
+        </p>
+        {room.status === "waiting" && (
+          <button
+            onClick={async () => {
+              try {
+                const r = await joinRoom(code, getPlayerName());
+                setRoom(r);
+                toast.success("Você entrou na sala!");
+              } catch (e) {
+                toast.error(e instanceof Error ? e.message : "Não foi possível entrar na sala.");
+              }
+            }}
+            className="mt-4 rounded-full bg-[var(--gold)] px-6 py-2 text-xs font-bold text-black cursor-pointer"
+          >
+            Entrar nesta sala
+          </button>
+        )}
+        <div className="mt-4">
+          <Link to="/online" className="text-xs underline underline-offset-4 text-muted-foreground">
+            Voltar para o menu online
+          </Link>
+        </div>
       </Shell>
     );
   }
