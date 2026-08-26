@@ -43,6 +43,21 @@ export function TableView({
   const [selected, setSelected] = useState<string[]>([]);
   const [showLog, setShowLog] = useState(false);
   const [hideRoundOverModal, setHideRoundOverModal] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    const checkAdmin = () => {
+      setIsAdmin(
+        localStorage.getItem("admin_mode") === "true" ||
+        localStorage.getItem("murilo_admin") === "true" ||
+        sessionStorage.getItem("admin_mode") === "true" ||
+        (typeof window !== "undefined" && window.location.search.includes("admin=true"))
+      );
+    };
+    checkAdmin();
+    window.addEventListener("ADMIN_MODE_TOGGLE", checkAdmin);
+    return () => window.removeEventListener("ADMIN_MODE_TOGGLE", checkAdmin);
+  }, []);
 
   const oppSeat: PlayerId = seat === "player" ? "ai" : "player";
   const me = state.players[seat];
@@ -382,14 +397,16 @@ export function TableView({
           >
             Desistir
           </button>
-          <button
-            disabled={state.phase === "over"}
-            onClick={() => triggerInstantWin(seat)}
-            title="Clique para bater a partida e testar a tela de vitória imediatamente"
-            className="rounded-full border border-amber-500/50 bg-amber-500/15 px-3.5 py-1.5 text-xs font-semibold text-amber-300 hover:bg-amber-500/25 active:scale-95 transition-all cursor-pointer shadow-md"
-          >
-            ⚡ Ganhar (Teste)
-          </button>
+          {isAdmin && (
+            <button
+              disabled={state.phase === "over"}
+              onClick={() => triggerInstantWin(seat)}
+              title="Exclusivo Admin: bater a partida e testar a tela de vitória imediatamente"
+              className="rounded-full border border-amber-500/50 bg-amber-500/15 px-3.5 py-1.5 text-xs font-semibold text-amber-300 hover:bg-amber-500/25 active:scale-95 transition-all cursor-pointer shadow-md"
+            >
+              ⚡ Ganhar (Admin)
+            </button>
+          )}
         </div>
 
         {showLog && (

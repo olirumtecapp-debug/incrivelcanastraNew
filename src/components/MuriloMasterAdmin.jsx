@@ -13,7 +13,14 @@ export function MuriloMasterAdmin() {
       // Atalho: Alt + Shift + M
       if (e.altKey && e.shiftKey && (e.key === 'M' || e.key === 'm')) {
         e.preventDefault();
-        setIsOpen((prev) => !prev);
+        setIsOpen((prev) => {
+          const next = !prev;
+          if (next) {
+            localStorage.setItem('admin_mode', 'true');
+            window.dispatchEvent(new CustomEvent('ADMIN_MODE_TOGGLE', { detail: { active: true } }));
+          }
+          return next;
+        });
       }
     };
     window.addEventListener('keydown', handleKeyDown);
