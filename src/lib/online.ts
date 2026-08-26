@@ -4,9 +4,6 @@ import type { GameState } from "@/lib/canastra/types";
 const ID_KEY = "canastra:player-id";
 const NAME_KEY = "canastra:player-name";
 
-let activeBroadcastChannel: BroadcastChannel | null = null;
-let activeSupabaseChannel: ReturnType<typeof supabase.channel> | null = null;
-
 export function getPlayerId(): string {
   if (typeof window === "undefined") return "";
   let id = localStorage.getItem(ID_KEY);
@@ -23,7 +20,7 @@ export function getPlayerName(): string {
 }
 
 export function setPlayerName(name: string) {
-  localStorage.setItem(NAME_KEY, name.slice(0, 24));
+  localStorage.setItem(NAME_KEY, (name || "Jogador").slice(0, 24));
 }
 
 export interface Room {
@@ -42,17 +39,12 @@ const asRoom = (data: unknown): Room => data as Room;
 
 function emitLocal(code: string, event: string, room: Room) {
   try {
-    if (activeBroadcastChannel) {
-      activeBroadcastChannel.postMessage({ event, room });
-    }
-  } catch {}
-  try {
-    if (activeSupabaseChannel) {
-      activeSupabaseChannel.send({
-        type: "broadcast",
-        event,
-        payload: { room },
-      });
+    if (typeof BroadcastChannel !== "undefined") {
+      const bc = new BroadcastChannel(`canastra_bc_${code}`);
+      bc.postMessage({ event, room });
+      setTimeout(() => {
+        try { bc.close(); } catch {}
+      }, 500);
     }
   } catch {}
 }
@@ -92,9 +84,11 @@ export async function joinRoom(code: string, name: string): Promise<Room> {
     .maybeSingle();
 
   if (findError || !room) throw new Error("Sala não encontrada.");
-  if (room.status !== "waiting" && room.host_id !== guestId) throw new Error("Sala já iniciada.");
+  if (room.status !== "waiting" && room.host_id !== guestId && room.guest_id !== guestId) {
+    throw new Error("Sala já iniciada ou cheia.");
+  }
 
-  if (room.host_id === guestId) return asRoom(room);
+  if (room.host_id === guestId || room.guest_id === guestId) return asRoom(room);
 
   const { data: updated, error: updateError } = await supabase
     .from("rooms")
@@ -120,7 +114,7 @@ export async function fetchRoom(code: string): Promise<Room | null> {
     .select("*")
     .eq("code", code.trim().toUpperCase())
     .maybeSingle();
-  if (error) throw new Error(error.message);
+  if (error) return null;
   return data ? asRoom(data) : null;
 }
 
@@ -149,63 +143,58 @@ export async function pushRoomState(
 
 export function subscribeRoom(code: string, onChange: (room: Room) => void) {
   const cleanCode = code.trim().toUpperCase();
+  let lastSerialized = "";
 
-  // 1. BroadcastChannel local
+  const safeNotify = (r: Room) => {
+    if (!r) return;
+    try {
+      const current = `${r.status}_${r.guest_id}_${r.updated_at}_${r.state?.turn}_${r.state?.phase}`;
+      if (current !== lastSerialized) {
+        lastSerialized = current;
+        onChange(r);
+      }
+    } catch {
+      onChange(r);
+    }
+  };
+
+  let bc: BroadcastChannel | null = null;
   try {
     if (typeof BroadcastChannel !== "undefined") {
-      if (activeBroadcastChannel) activeBroadcastChannel.close();
-      activeBroadcastChannel = new BroadcastChannel(`canastra_bc_${cleanCode}`);
-      activeBroadcastChannel.onmessage = (e) => {
-        if (e.data && e.data.room) onChange(asRoom(e.data.room));
+      bc = new BroadcastChannel(`canastra_bc_${cleanCode}`);
+      bc.onmessage = (e) => {
+        if (e.data?.room) safeNotify(asRoom(e.data.room));
       };
     }
   } catch {}
 
-  // 2. Supabase Realtime Channel
-  if (activeSupabaseChannel) {
-    try { void supabase.removeChannel(activeSupabaseChannel); } catch {}
-  }
-
   const channel = supabase.channel(`canastra_room_${cleanCode}`, {
     config: { broadcast: { self: false } },
   });
-  activeSupabaseChannel = channel;
 
   channel
     .on("broadcast", { event: "ROOM_UPDATE" }, ({ payload }) => {
-      if (payload?.room) onChange(asRoom(payload.room));
+      if (payload?.room) safeNotify(asRoom(payload.room));
     })
     .on("broadcast", { event: "PLAYER_JOIN" }, ({ payload }) => {
-      if (payload?.room) onChange(asRoom(payload.room));
+      if (payload?.room) safeNotify(asRoom(payload.room));
     })
-    .on(
-      "postgres_changes",
-      { event: "*", schema: "public", table: "rooms", filter: `code=eq.${cleanCode}` },
-      (payload) => {
-        if (payload.new) onChange(asRoom(payload.new));
-      },
-    )
     .subscribe();
 
-  // 3. Fallback Polling a cada 1s
   const pollTimer = setInterval(async () => {
     try {
       const room = await fetchRoom(cleanCode);
-      if (room) onChange(room);
+      if (room) safeNotify(room);
     } catch {}
-  }, 1000);
+  }, 1500);
 
   return () => {
     clearInterval(pollTimer);
     try {
-      if (activeBroadcastChannel) {
-        activeBroadcastChannel.close();
-        activeBroadcastChannel = null;
-      }
+      if (bc) bc.close();
     } catch {}
     try {
       void supabase.removeChannel(channel);
-      if (activeSupabaseChannel === channel) activeSupabaseChannel = null;
     } catch {}
   };
 }

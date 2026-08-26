@@ -57,22 +57,6 @@ function Sala() {
     };
   }, [code]);
 
-  useEffect(() => {
-    if (!room || loading) return;
-    if (
-      String(room.host_id) !== String(playerId) &&
-      String(room.guest_id) !== String(playerId) &&
-      (room.status === "waiting" || !room.guest_id)
-    ) {
-      void joinRoom(code, getPlayerName())
-        .then((r) => {
-          setRoom(r);
-          toast.success("Você entrou na sala!");
-        })
-        .catch(() => {});
-    }
-  }, [room, loading, playerId, code]);
-
   const isHost = !!room && String(room.host_id) === String(playerId);
   const isGuest = !!room && String(room.guest_id) === String(playerId);
   const seat: PlayerId = isHost ? "player" : "ai";
