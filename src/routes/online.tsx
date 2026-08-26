@@ -85,14 +85,18 @@ function Online() {
           Jogue com um amigo em tempo real: crie uma sala e envie o código de 6 letras.
         </p>
 
-        <label className="mt-8 block text-xs tracking-widest text-muted-foreground uppercase">
+        <label htmlFor="online-player-name" className="mt-8 block text-xs tracking-widest text-muted-foreground uppercase cursor-pointer">
           Seu nome
         </label>
         <input
+          id="online-player-name"
+          name="playerName"
+          type="text"
           value={name}
           onChange={(e) => setName(e.target.value)}
+          placeholder="Digite seu nome..."
           maxLength={24}
-          className="mt-2 w-full rounded-xl border bg-transparent px-4 py-3 outline-none focus:border-[var(--gold)]"
+          className="mt-2 w-full rounded-xl border border-white/20 bg-black/40 px-4 py-3 text-white outline-none focus:border-[var(--gold)] focus:ring-1 focus:ring-[var(--gold)] cursor-text transition-all text-base"
         />
 
         <div className="mt-8 grid gap-4 sm:grid-cols-2">
@@ -104,7 +108,7 @@ function Online() {
             <button
               disabled={busy}
               onClick={() => void onCreate()}
-              className="mt-5 w-full rounded-full bg-[var(--gold)] px-5 py-2.5 font-semibold text-[var(--primary-foreground)] disabled:opacity-50"
+              className="mt-5 w-full rounded-full bg-[var(--gold)] px-5 py-2.5 font-semibold text-[var(--primary-foreground)] disabled:opacity-50 cursor-pointer shadow-lg hover:brightness-110 active:scale-95 transition-all"
             >
               Criar e receber código
             </button>
@@ -113,16 +117,19 @@ function Online() {
           <div className="glass rounded-2xl p-6">
             <h2 className="font-display text-xl">Entrar com código</h2>
             <input
+              id="online-room-code"
+              name="roomCode"
+              type="text"
               value={code}
               onChange={(e) => setCode(e.target.value.toUpperCase())}
               placeholder="ABC123"
               maxLength={6}
-              className="mt-4 w-full rounded-xl border bg-transparent px-4 py-3 text-center text-2xl tracking-[0.4em] outline-none focus:border-[var(--gold)]"
+              className="mt-4 w-full rounded-xl border border-white/20 bg-black/40 px-4 py-3 text-center text-2xl font-mono font-bold tracking-[0.4em] text-[var(--gold)] outline-none focus:border-[var(--gold)] focus:ring-1 focus:ring-[var(--gold)] cursor-text transition-all uppercase"
             />
             <button
               disabled={busy}
               onClick={() => void onJoin()}
-              className="mt-4 w-full rounded-full border px-5 py-2.5 font-semibold transition-colors hover:bg-[var(--gold)]/10 disabled:opacity-50"
+              className="mt-4 w-full rounded-full border border-[var(--gold)]/60 bg-[var(--gold)]/10 px-5 py-2.5 font-semibold text-[var(--gold)] transition-all hover:bg-[var(--gold)]/20 active:scale-95 disabled:opacity-50 cursor-pointer"
             >
               Entrar na sala
             </button>
