@@ -1,7 +1,6 @@
 import { useState, type ReactNode } from "react";
 import { toast } from "sonner";
 import { PlayingCard } from "@/components/game/PlayingCard";
-import { ComoJogarModal } from "@/components/game/ComoJogarModal";
 import {
   addToMeld,
   canAppend,
@@ -15,7 +14,6 @@ import {
 } from "@/lib/canastra/engine";
 import { isCanastra, isClean, sortHand, SUIT_SYMBOL, validateMeld } from "@/lib/canastra/rules";
 import type { Card, GameState, Meld, PlayerId } from "@/lib/canastra/types";
-import { HelpCircle } from "lucide-react";
 
 interface Props {
   state: GameState;
@@ -42,7 +40,6 @@ export function TableView({
 }: Props) {
   const [selected, setSelected] = useState<string[]>([]);
   const [showLog, setShowLog] = useState(false);
-  const [showRulesModal, setShowRulesModal] = useState(false);
 
   const oppSeat: PlayerId = seat === "player" ? "ai" : "player";
   const me = state.players[seat];
@@ -185,8 +182,6 @@ export function TableView({
 
   return (
     <main className="mx-auto flex w-full max-w-6xl min-h-0 flex-1 flex-col gap-2 px-2 py-2 sm:px-4">
-      <ComoJogarModal open={showRulesModal} onOpenChange={setShowRulesModal} />
-
       <div className="grid shrink-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
         <div className="min-w-0">
           <h1 className="truncate text-base font-semibold sm:text-xl">{title}</h1>
@@ -194,16 +189,7 @@ export function TableView({
             <p className="truncate text-[11px] text-muted-foreground sm:text-xs">{subtitle}</p>
           )}
         </div>
-        <div className="flex shrink-0 items-center gap-1.5 text-xs">
-          <button
-            onClick={() => setShowRulesModal(true)}
-            className="flex items-center gap-1 rounded-full border border-[var(--gold)]/40 bg-[var(--gold)]/10 px-3 py-1.5 font-medium text-[var(--gold)] transition-colors hover:bg-[var(--gold)]/20"
-          >
-            <HelpCircle className="h-3.5 w-3.5" />
-            <span>Como jogar</span>
-          </button>
-          {actions}
-        </div>
+        <div className="flex shrink-0 items-center gap-1.5 text-xs">{actions}</div>
       </div>
 
       <section className="relative flex min-h-0 flex-1 flex-col gap-1 overflow-hidden rounded-2xl border border-[var(--gold)]/25 bg-[radial-gradient(ellipse_at_center,var(--felt),var(--felt-deep))] p-2 shadow-[inset_0_2px_40px_rgba(0,0,0,0.55)] sm:gap-2 sm:p-4">
